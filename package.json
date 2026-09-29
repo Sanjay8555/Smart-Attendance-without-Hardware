@@ -1,0 +1,42 @@
+{
+  "name": "smart-attendance-system",
+  "version": "1.0.0",
+  "description": "Smart Attendance Management System Without Dedicated Biometric Hardware",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "seed": "node server/database/seed.js",
+    "build": "cd client && npm run build",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"node server/server.js\" \"cd client && npm run dev\""
+  },
+  "keywords": [
+    "attendance",
+    "smart-attendance",
+    "dynamic-qr",
+    "geofence",
+    "face-verification",
+    "liveness-check",
+    "otp"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "concurrently": "^10.0.5",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.12.1",
+    "pg": "^8.23.0",
+    "socket.io": "^4.8.4",
+    "uuid": "^14.0.2",
+    "xlsx": "^0.18.5"
+  }
+}

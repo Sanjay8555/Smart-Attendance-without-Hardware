@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+  body {
+    font-family: var(--font-sans);
+    background-color: #f8fafc;
+    color: #0f172a;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Light Glassmorphism Classes */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+.glass-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease-in-out;
+}
+
+.glass-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.1), 0 8px 10px -6px rgba(99, 102, 241, 0.05);
+}
+
+.glass-modal {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
+}
+
+/* Dynamic QR Laser Scanning Beam Animation */
+@keyframes scanLaser {
+  0% {
+    top: 5%;
+    opacity: 0.8;
+  }
+  50% {
+    top: 90%;
+    opacity: 1;
+  }
+  100% {
+    top: 5%;
+    opacity: 0.8;
+  }
+}
+
+.scan-laser {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #4f46e5, #0284c7, #4f46e5, transparent);
+  box-shadow: 0 0 16px 2px rgba(2, 132, 199, 0.8);
+  animation: scanLaser 2.2s ease-in-out infinite;
+  z-index: 20;
+}
+
+/* Rotating QR Ring Countdown */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(79, 70, 229, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(79, 70, 229, 0.35);
+  }
+}
+
+.pulse-qr {
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+/* Face Oval Guidance */
+.face-guide-oval {
+  border: 3px dashed rgba(2, 132, 199, 0.75);
+  border-radius: 50% / 60%;
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.4);
+}
+
+.face-guide-oval.verified {
+  border: 3px solid #059669;
+  box-shadow: 0 0 25px rgba(5, 150, 105, 0.6), 0 0 0 9999px rgba(15, 23, 42, 0.4);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Ensure HTML5 QR Code Video feeds display clearly without black screens */
+#public-qr-region,
+#student-direct-qr-region,
+#unified-qr-reader-region,
+#staff-qr-reader-region {
+  position: relative;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 260px;
+  overflow: hidden;
+}
+
+#public-qr-region video,
+#student-direct-qr-region video,
+#unified-qr-reader-region video,
+#staff-qr-reader-region video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 1rem;
+}
