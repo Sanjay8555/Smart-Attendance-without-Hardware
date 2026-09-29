@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "Smart Attendance Management System Without Dedicated Biometric Hardware",
   "main": "server/server.js",
+  "workspaces": [
+    "client"
+  ],
   "scripts": {
     "start": "node server/server.js",
     "seed": "node server/database/seed.js",
-    "build": "cd client && npm install --legacy-peer-deps && npm run build",
-    "client": "cd client && npm run dev",
-    "dev": "concurrently \"node server/server.js\" \"cd client && npm run dev\""
+    "build": "npm run build --workspace=client",
+    "vercel-build": "npm run build --workspace=client",
+    "client": "npm run dev --workspace=client",
+    "dev": "concurrently \"node server/server.js\" \"npm run dev --workspace=client\""
   },
   "keywords": [
     "attendance",
