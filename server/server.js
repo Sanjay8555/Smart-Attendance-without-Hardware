@@ -104,22 +104,24 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Server
-server.listen(config.PORT, async () => {
-  console.log(`🚀 Smart Attendance Server is running on http://localhost:${config.PORT}`);
-  
-  // Initialize and synchronize with Supabase PostgreSQL cloud database
-  try {
-    const { initSupabaseConnection, syncAllToSupabase } = require('./database/supabaseSync');
-    const { db } = require('./database/db');
-    const connected = await initSupabaseConnection();
-    if (connected) {
-      syncAllToSupabase(db).catch(e => console.warn('Supabase initial sync note:', e.message));
+// Start Server if executed directly
+if (require.main === module) {
+  server.listen(config.PORT, async () => {
+    console.log(`🚀 Smart Attendance Server is running on http://localhost:${config.PORT}`);
+    
+    // Initialize and synchronize with Supabase PostgreSQL cloud database
+    try {
+      const { initSupabaseConnection, syncAllToSupabase } = require('./database/supabaseSync');
+      const { db } = require('./database/db');
+      const connected = await initSupabaseConnection();
+      if (connected) {
+        syncAllToSupabase(db).catch(e => console.warn('Supabase initial sync note:', e.message));
+      }
+    } catch (supabaseErr) {
+      console.warn('Supabase cloud init note:', supabaseErr.message);
     }
-  } catch (supabaseErr) {
-    console.warn('Supabase cloud init note:', supabaseErr.message);
-  }
-});
+  });
+}
 
 module.exports = { app, server };
 

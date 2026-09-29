@@ -5,7 +5,9 @@ module.exports = {
   PORT: process.env.PORT || 5000,
   JWT_SECRET: process.env.JWT_SECRET || 'smart-attendance-super-secret-jwt-key-2026-prod',
   JWT_EXPIRES_IN: '24h',
-  DB_PATH: path.join(__dirname, '..', 'database', 'attendance.db'),
+  DB_PATH: process.env.VERCEL
+    ? path.join('/tmp', 'attendance.db')
+    : (process.env.DB_PATH || path.join(__dirname, '..', 'database', 'attendance.db')),
   SUPABASE_URL: process.env.SUPABASE_URL || '',
   SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || '',
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || '',

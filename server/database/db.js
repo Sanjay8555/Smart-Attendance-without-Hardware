@@ -300,6 +300,17 @@ function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_audit_severity ON audit_logs(severity);
     CREATE INDEX IF NOT EXISTS idx_notif_user ON notifications(user_id);
   `);
+
+  // Auto seed initial data if running in fresh environment
+  try {
+    const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get()?.count || 0;
+    if (userCount === 0) {
+      const { seedDatabase } = require('./seed');
+      seedDatabase();
+    }
+  } catch (e) {
+    console.warn('Auto seed note:', e.message);
+  }
 }
 
 initSchema();

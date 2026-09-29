@@ -1,4 +1,6 @@
-const BASE_URL = '/api';
+const BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/api`
+  : '/api';
 
 function getAuthHeaders() {
   const token = localStorage.getItem('smart_attendance_token');
@@ -11,17 +13,39 @@ function getAuthHeaders() {
   return headers;
 }
 
+async function handleResponse(res) {
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    const data = await res.json();
+    if (!res.ok) {
+      const err = new Error(data.message || `Request failed with status ${res.status}`);
+      Object.assign(err, data);
+      throw err;
+    }
+    return data;
+  }
+
+  const text = await res.text();
+  if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error('Backend API endpoint not found (404). If deployed on Vercel, please check vercel.json API rewrites.');
+    }
+    throw new Error(`Server returned status ${res.status}`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { success: true, text };
+  }
+}
+
 export const api = {
   async get(endpoint) {
     const res = await fetch(`${BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || 'Request failed');
-    }
-    return data;
+    return handleResponse(res);
   },
 
   async post(endpoint, body = {}) {
@@ -30,11 +54,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(body),
     });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || 'Request failed');
-    }
-    return data;
+    return handleResponse(res);
   },
 
   async put(endpoint, body = {}) {
@@ -43,11 +63,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(body),
     });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || 'Request failed');
-    }
-    return data;
+    return handleResponse(res);
   },
 
   async delete(endpoint) {
@@ -55,11 +71,7 @@ export const api = {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || 'Request failed');
-    }
-    return data;
+    return handleResponse(res);
   },
 
   async downloadFile(endpoint, defaultFilename = 'download') {
