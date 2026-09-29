@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server/server.js",
     "seed": "node server/database/seed.js",
-    "build": "cd client && npm run build",
+    "build": "cd client && npm install --legacy-peer-deps && npm run build",
     "client": "cd client && npm run dev",
     "dev": "concurrently \"node server/server.js\" \"cd client && npm run dev\""
   },
