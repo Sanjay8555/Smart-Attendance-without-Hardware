@@ -53,23 +53,24 @@ app.use(express.json({ limit: '10mb' })); // Allow face embedding arrays / camer
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('dev'));
 
-// Mount API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/academic', academicRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/locations', locationsRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/session', sessionRoutes);
-app.use('/api/attendance', attendanceRoutes);
-app.use('/api/face', faceRoutes);
-app.use('/api/reports', reportsRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/audit', auditRoutes);
-app.use('/api/notifications', notificationsRoutes);
-app.use('/api/proxy', proxyRoutes);
+// Mount API Routes (Accessible both via /api/* and directly /* for serverless handlers)
+const apiRouter = express.Router();
 
-// Health check & Database Status
-app.get('/api/health', (req, res) => {
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/academic', academicRoutes);
+apiRouter.use('/users', usersRoutes);
+apiRouter.use('/locations', locationsRoutes);
+apiRouter.use('/settings', settingsRoutes);
+apiRouter.use('/session', sessionRoutes);
+apiRouter.use('/attendance', attendanceRoutes);
+apiRouter.use('/face', faceRoutes);
+apiRouter.use('/reports', reportsRoutes);
+apiRouter.use('/analytics', analyticsRoutes);
+apiRouter.use('/audit', auditRoutes);
+apiRouter.use('/notifications', notificationsRoutes);
+apiRouter.use('/proxy', proxyRoutes);
+
+apiRouter.get('/health', (req, res) => {
   const { getSupabaseHealth } = require('./database/supabaseSync');
   res.json({
     status: 'OK',
@@ -79,6 +80,10 @@ app.get('/api/health', (req, res) => {
     supabase: getSupabaseHealth()
   });
 });
+
+// Mount on /api and root
+app.use('/api', apiRouter);
+app.use(apiRouter);
 
 // Serve frontend in production if built
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
