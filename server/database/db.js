@@ -1,19 +1,87 @@
-const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 const config = require('../config/config');
 
-// Ensure database folder exists
-const dbDir = path.dirname(config.DB_PATH);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+let db = null;
+
+try {
+  const Database = require('better-sqlite3');
+  const dbDir = path.dirname(config.DB_PATH);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+  db = new Database(config.DB_PATH);
+  try {
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+  } catch (e) {}
+} catch (err) {
+  console.warn('Native better-sqlite3 not available. Using WASM SQLite engine for serverless compatibility.');
+  
+  // Pure JS / WebAssembly SQLite fallback for Vercel Serverless
+  const initSqlJs = require('sql.js');
+  let rawDb = null;
+
+  // Read existing DB file if exists
+  try {
+    if (fs.existsSync(config.DB_PATH)) {
+      const fileBuffer = fs.readFileSync(config.DB_PATH);
+      const SQL = require('sql.js');
+      rawDb = new SQL.Database(fileBuffer);
+    }
+  } catch (e) {}
+
+  if (!rawDb) {
+    const SQL = require('sql.js');
+    rawDb = new SQL.Database();
+  }
+
+  db = {
+    exec(sql) { rawDb.run(sql); },
+    pragma(p) {},
+    transaction(fn) {
+      return function(...args) {
+        rawDb.run('BEGIN TRANSACTION;');
+        try {
+          const res = fn(...args);
+          rawDb.run('COMMIT;');
+          return res;
+        } catch (e) {
+          rawDb.run('ROLLBACK;');
+          throw e;
+        }
+      };
+    },
+    prepare(sql) {
+      return {
+        get(...params) {
+          const stmt = rawDb.prepare(sql);
+          stmt.bind(params.flat());
+          let row = undefined;
+          if (stmt.step()) {
+            row = stmt.getAsObject();
+          }
+          stmt.free();
+          return row;
+        },
+        all(...params) {
+          const stmt = rawDb.prepare(sql);
+          stmt.bind(params.flat());
+          const rows = [];
+          while (stmt.step()) {
+            rows.push(stmt.getAsObject());
+          }
+          stmt.free();
+          return rows;
+        },
+        run(...params) {
+          rawDb.run(sql, params.flat());
+          return { changes: rawDb.getRowsModified() };
+        }
+      };
+    }
+  };
 }
-
-const db = new Database(config.DB_PATH);
-
-// Enable WAL mode for high concurrency and performance
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
 
 function initSchema() {
   db.exec(`
